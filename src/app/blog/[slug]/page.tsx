@@ -5,22 +5,29 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
-export async function generateMetadata({
-  params,
-}: {
+type PageProps = {
   params: {
     slug: string;
   };
-}): Promise<Metadata | undefined> {
-  let post = await getPost(params.slug);
+};
 
-  let {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata | undefined> {
+  const post = await getPost(params.slug);
+
+  if (!post) {
+    return undefined;
+  }
+
+  const {
     title,
     publishedAt: publishedTime,
     summary: description,
     image,
   } = post.metadata;
-  let ogImage = image ? `${DATA.url}${image}` : `${DATA.url}/og?title=${title}`;
+
+  const ogImage = image ? `${DATA.url}${image}` : `${DATA.url}/og?title=${title}`;
 
   return {
     title,
@@ -46,15 +53,8 @@ export async function generateMetadata({
   };
 }
 
-interface PageProps {
-  params: {
-    slug: string;
-  };
-}
-
 export default async function Blog({ params }: PageProps) {
-
-  let post = await getPost(params.slug);
+  const post = await getPost(params.slug);
 
   if (!post) {
     notFound();
